@@ -64,7 +64,7 @@ class App {
     this.app.use(
       bodyParser.json({
         verify: (req, res, buf) => {
-          if (req.url.includes('/api/webhook')) req['rawBody'] = buf;
+          if (req.url.includes('/webhook')) req['rawBody'] = buf;
         },
       }),
     );
