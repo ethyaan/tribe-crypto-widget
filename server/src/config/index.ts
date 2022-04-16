@@ -15,4 +15,6 @@ export const {
   LOG_FORMAT,
   LOG_DIR = '../logs',
   ORIGIN,
+  CMC_API_URL,
+  CMC_KEY
 } = process.env;
