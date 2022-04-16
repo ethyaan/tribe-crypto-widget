@@ -1,17 +1,27 @@
 import { NextFunction, Request, Response } from 'express';
-
 import { Types } from '@tribeplatform/gql-client';
 import { logger } from '@/utils/logger';
+import { getTop10, getSelectedList, getGainerLooser } from '@services/coinmarktcap';
 
-const DEFAULT_SETTINGS = {}
+const WIDGET_LIST = {
+  'top-10' : { get: getTop10 } ,
+  'list'   : { get: getSelectedList },
+  'looser' : { get: getGainerLooser },
+  'gainer' : { get: getGainerLooser }
+};
 
 class WebhookController {
+
+  constructor() {
+    console.log('test =>');
+    // getSelectedList('BTC,ETH');
+  }
   public index = async (req: Request, res: Response, next: NextFunction) => {
     const input = req.body;
     try {
 
       // check if this is challenge request for verification or not, ifyes, perform it and stop oing further
-      if(this.challengePassResponse({...input, res }))  { return null };
+      if(this._challengePassResponse({...input, res }))  { return null };
 
       let result: any = {
         type: input.type,
@@ -21,7 +31,7 @@ class WebhookController {
 
       // if request type is 'SUBSCRIPTION' since we are going to check post.created, post.updated
       if(input.type === 'SUBSCRIPTION') {
-        result = await this.cryptoWidgetHandler(input);
+        result = await this._cryptoWidgetHandler(input);
       }
 
       res.status(200).json(result);
@@ -35,7 +45,11 @@ class WebhookController {
     }
   };
 
-  private challengePassResponse({ data, res }) {
+  /**
+   * return the challenge required response to verify the webhook api before update
+   * @returns boolean
+   */
+  private _challengePassResponse({ data, res }): boolean {
     if (data?.challenge) {
       res.json({
         type: 'TEST',
@@ -49,14 +63,19 @@ class WebhookController {
   }
 
   
-  private async cryptoWidgetHandler({ type , data }) {
+  /**
+   * the maim method to handle crypto widgets inside a post
+   * @param param0 
+   * @returns 
+   */
+  private async _cryptoWidgetHandler({ type , data }) {
     const { name, object: { mappingFields } } = data;
-    if(name === 'post.created') {
-      const { key, value, type } = mappingFields.filter( (e: any) => e.type === 'content')[0];
-
+    if(['post.created', 'post.updated'].indexOf(name)> -1) {
+      const { key, value, type } = mappingFields.filter(({ key }) => key === 'content')[0];
+      const shortCodes = this._extractCWShortCodes(value);
+      console.log('_DEBUG_ =>', shortCodes);
     }
-    console.log('_DEBUG_ =>', mappingFields);
-    console.log('_DEBUG_ =>', data);
+    // console.log('_DEBUG_ =>', mappingFields.filter( (e: any) =>{ console.log('_e_ =>', e); return e.type === 'content' }));
     return {
       type: type,
       status: 'SUCCEEDED',
@@ -64,93 +83,61 @@ class WebhookController {
     };
   }
 
-  // /\[cw\/?[^]]+]/gi
 
-  // {
-  //      time: '2022-04-16T19:24:11.043Z',
-  //      verb: 'CREATED',
-  //      verbAction: 'ADDED',
-  //      actor: {
-  //        id: 'sxTN0O5QuB',
-  //        roleId: 'kxFMlTeA0b',
-  //        roleType: 'admin',
-  //        sessionInfo: {
-  //          ip: '159.146.43.248',
-  //          country: 'Turkey',
-  //          locale: 'en-US',
-  //          client: 0,
-  //          clientVersion: '1.0.0',
-  //          os: 'Mac OS',
-  //          osVersion: '10.15.7',
-  //          deviceBrand: '',
-  //          trackerGlobalSessionId: null,
-  //          trackerSessionId: null
-  //        },
-  //        spaceRoleId: 'FuOMhVeFaFbH',
-  //        spaceRoleType: 'member'
-  //      },
-  //      object: {
-  //        id: 'uieW9EUM12X0xml',
-  //        networkId: 'SwnvrFguXX',
-  //        templateId: null,
-  //        spaceId: 'R4MQJSHTFb12',
-  //        postTypeId: 'vZtvQRvIwVwAYRG',
-  //        createdAt: '2022-04-16T19:24:11.043Z',
-  //        updatedAt: '2022-04-16T19:24:11.043Z',
-  //        publishedAt: '2022-04-16T19:24:11.214Z',
-  //        status: 'PUBLISHED',
-  //        createdById: 'sxTN0O5QuB',
-  //        ownerId: 'sxTN0O5QuB',
-  //        isAnonymous: false,
-  //        mentionedMembers: [],
-  //        embedIds: [],
-  //        imageIds: [],
-  //        pinnedInto: [],
-  //        repliedToId: null,
-  //        repliedToIds: [],
-  //        repliesCount: 0,
-  //        totalRepliesCount: 0,
-  //        seoDetail: { title: 'Second test' },
-  //        customSeoDetail: {},
-  //        topRepliers: [],
-  //        title: 'Second test',
-  //        slug: 'second-test',
-  //        key: 'uieW9EUM12X0xml',
-  //        shortContent: '<p>test hook call</p>',
-  //        language: 'en',
-  //        hasMoreContent: false,
-  //        isReply: false,
-  //        mappingFields: [ [Object], [Object], [Object] ],
-  //        primaryReactionType: 'EMOJI_BASE',
-  //        positiveReactionsCount: 0,
-  //        negativeReactionsCount: 0,
-  //        reactionsCount: 0,
-  //        singleChoiceReactions: [],
-  //        isHidden: false,
-  //        positiveReactions: null,
-  //        negativeReactions: null,
-  //        allowedEmojis: null,
-  //        forbiddenEmojis: null,
-  //        tagIds: [],
-  //        attachmentIds: [],
-  //        searchFields: [ 'title', 'content' ]
-  //      },
-  //      with: {},
-  //      target: {
-  //        organizationId: '43MFLbqLot',
-  //        networkId: 'SwnvrFguXX',
-  //        collectionId: 'fgundhqCKBm1',
-  //        postTypeId: 'vZtvQRvIwVwAYRG',
-  //        spaceId: 'R4MQJSHTFb12',
-  //        memberId: 'sxTN0O5QuB'
-  //      },
-  //      id: '297ad49dbd36c2a8c86dccefa110c565',
-  //      name: 'post.created',
-  //      noun: 'POST',
-  //      shortDescription: 'Create Post',
-  //      secretInfo: null
-  //    }
+  /**
+   * extract a unique list of used shortcodes
+   * @param content 
+   * @returns 
+   */
+  private _extractCWShortCodes(content) {
+    const regex = /\[cw\/?[^]+]/gi;
+    const matches =  content.match(regex);
+    if(matches) {
+      const widgets = matches.map((widget) => {
+         return this.getWidgetTypeAndInformation(widget);
+      }).filter((element, index, array) => index === array.findIndex((item) => item.widget === element.widget));
+      return widgets;
+    }
+    return null;
+  }
 
+  /**
+   * get the type of the widget and it's properties values 
+   * @param widgetShortCode 
+   * @returns 
+   */
+  private getWidgetTypeAndInformation(widgetShortCode: string) {
+    for(let widget of Object.keys(WIDGET_LIST)) {
+      if(widgetShortCode.includes(widget)) {
+        const widgetValue = this._getWidgetProperyValue(widgetShortCode, widget);
+        const widgetPair  = this._getWidgetProperyValue(widgetShortCode, 'pair');
+        return {
+          code: widgetShortCode,
+          widget,
+          widgetValue,
+          widgetPair
+        };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * get the propery value of the shortCode if value exists 
+   * @param widgetShortCode 
+   * @param property 
+   * @returns 
+   */
+  private _getWidgetProperyValue(widgetShortCode: string, property: string): string|null {
+    const parts = widgetShortCode.replace(/\[|\]|["]+/gi, '').split(' ');
+    for(let part of parts) {
+      if(part.includes(property) && part.includes('=')) {
+        const value = part.split('=')[1];
+        return value ? value: '';
+      }
+    }
+    return null;
+  }
 
 }
 
