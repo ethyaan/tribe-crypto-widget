@@ -2,18 +2,26 @@ import axios from "axios";
 import { CMC_API_URL, CMC_KEY } from "@config"
 import { logger } from '@/utils/logger';
 
+// list of used coin market cap apis
 const apiRoutes = {
     'listings-latest'   : '/v1/cryptocurrency/listings/latest',
     'quotes-latest'     : '/v2/cryptocurrency/quotes/latest',
     'gainers-losers'    : '/v1/cryptocurrency/trending/gainers-losers'
 };
 
+// gainer looser params as enum
 enum sortDirection {
     gainer = 'asc',
     looser = 'desc'
 }
 
-const call = (rouetName: string, queryString: string, basePair = 'USD') => {
+/**
+ * this is for calling axios api with CMC_key mapped
+ * @param rouetName base on apiRoutes defined apis
+ * @param queryString optional query string
+ * @returns axios instance
+ */
+const call = (rouetName: string, queryString: string = ``) => {
     const route = apiRoutes[rouetName];
     if(!route) return;
     return axios.get(
@@ -22,6 +30,23 @@ const call = (rouetName: string, queryString: string, basePair = 'USD') => {
     );
 };
 
+/**
+ * generate response array based on api response object
+ * @param responseArray 
+ * @param basePair 
+ */
+const generateResponseArray = (responseArray: any, basePair: string) => {
+    let response = [];
+    (responseArray && responseArray.forEach(({ symbol, quote }) => {
+        const { price, percent_change_24h } = quote[basePair];
+        response.push({
+            symbol: `${symbol}/${basePair}`,
+            price: parseFloat(price).toFixed(2),
+            percent_change_24h : parseFloat(percent_change_24h).toFixed(2)
+        });
+    }));
+    return response;
+}
 
 /**
  * get top 10 from coin market cap based on cmc_rank and format as simpler object
@@ -30,17 +55,9 @@ const call = (rouetName: string, queryString: string, basePair = 'USD') => {
 export const getTop10 = (): Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
-            let response = [];
             let basePair = `USD`;
             let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${basePair}`);
-            data.forEach(({ symbol, quote }) => {
-                const { price, percent_change_24h } = quote[basePair];
-                response.push({
-                    symbol: `${symbol}/${basePair}`,
-                    price: parseFloat(price).toFixed(2),
-                    percent_change_24h : parseFloat(percent_change_24h).toFixed(2)
-                });
-            });
+            const response = generateResponseArray(data, basePair);
             resolve(response);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
@@ -57,19 +74,12 @@ export const getTop10 = (): Promise<any> => {
 export const getSelectedList = (selectedSymbols: String):Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
-            let response = [];
             let basePair = `USD`;
             let { data: { data }} = await call('quotes-latest', `?symbol=${selectedSymbols}&convert=${basePair}`);
-            console.log('_DEBUG_ =>', data);
-            Object.keys(data).forEach((key) => {
-                const { symbol, quote } = data[key];
-                const { price, percent_change_24h } = quote[basePair];
-                response.push({
-                    symbol: `${symbol}/${basePair}`,
-                    price: parseFloat(price).toFixed(2),
-                    percent_change_24h : parseFloat(percent_change_24h).toFixed(2)
-                });
-            });
+            const response = generateResponseArray(
+                Object.keys(data).map((key) => data[key]),
+                basePair
+            );
             resolve(response);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
@@ -78,19 +88,17 @@ export const getSelectedList = (selectedSymbols: String):Promise<any> => {
     });
 }
 
+/**
+ * get the list of top 10 gainers or loosers
+ * @param sortDirection 
+ * @returns 
+ */
 export const getGainerLooser = (sortDirection: sortDirection) => {
     return new Promise(async(resolve, reject) => {
-        try {let response = [];
+        try {
             let basePair = `USD`;
             let { data: { data }} = await call('gainers-losers', `?start=1&limit=10&sort_dir=${sortDirection}&convert=${basePair}`);
-            data.forEach(({ symbol, quote }) => {
-                const { price, percent_change_24h } = quote[basePair];
-                response.push({
-                    symbol: `${symbol}/${basePair}`,
-                    price: parseFloat(price).toFixed(2),
-                    percent_change_24h : parseFloat(percent_change_24h).toFixed(2)
-                });
-            });
+            const response = generateResponseArray(data, basePair);
             resolve(response);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
