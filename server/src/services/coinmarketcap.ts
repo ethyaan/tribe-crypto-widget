@@ -36,7 +36,7 @@ const generateResponseArray = (responseArray: any, pair: string) => {
         response.push({
             symbol: `${symbol}/${pair}`,
             price: parseFloat(price).toFixed(2),
-            percent_change_24h : parseFloat(percent_change_24h).toFixed(2)
+            percent_change_24h : (percent_change_24h > 0 ? '+' : '') + parseFloat(percent_change_24h).toFixed(2)
         });
     }));
     return response;
@@ -50,24 +50,12 @@ const generateResponseArray = (responseArray: any, pair: string) => {
 export const getTop10 = ({ pair }: any): Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
-            // let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${pair}`);
-            // const response = generateResponseArray(data, pair);
-            // resolve(response);
-            resolve([
-                   { symbol: 'BTC/USD', price: '40398.30', percent_change_24h: '-0.53' },
-                   { symbol: 'ETH/USD', price: '3059.47', percent_change_24h: '0.50' },
-                   { symbol: 'USDT/USD', price: '1.00', percent_change_24h: '-0.00' },
-                   { symbol: 'BNB/USD', price: '417.50', percent_change_24h: '-0.18' },
-                   { symbol: 'USDC/USD', price: '1.00', percent_change_24h: '0.00' },
-                   { symbol: 'XRP/USD', price: '0.78', percent_change_24h: '-2.41' },
-                   { symbol: 'SOL/USD', price: '102.03', percent_change_24h: '0.21' },
-                   { symbol: 'ADA/USD', price: '0.95', percent_change_24h: '-0.91' },
-                   { symbol: 'LUNA/USD', price: '80.78', percent_change_24h: '0.06' },
-                   { symbol: 'AVAX/USD', price: '77.58', percent_change_24h: '0.26' }
-                 ]);
+            let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${pair}`);
+            const response = generateResponseArray(data, pair);
+            resolve(response);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
-            reject(null);
+            resolve(null);
         }
     });
 }
@@ -82,13 +70,15 @@ export const getSelectedList = ({ selectedSymbols, pair }: any):Promise<any> => 
         try {
             let { data: { data }} = await call('quotes-latest', `?symbol=${selectedSymbols}&convert=${pair}`);
             const response = generateResponseArray(
-                Object.keys(data).map((key) => data[key]),
+                Object.keys(data).map((key) => data[key][0]),
                 pair
             );
-            resolve(response);
+            const sortingArray = selectedSymbols.split(',').map((i:any) => `${i}/${pair}`);
+            const sortedResponse = response.sort((a, b) => sortingArray.indexOf(a.symbol) - sortingArray.indexOf(b.symbol));
+            resolve(sortedResponse);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
-            reject(null);
+            resolve(null);
         }
     });
 }
@@ -106,7 +96,7 @@ export const getGainerLooser = ({ sortDirection, pair }: any): Promise<any> => {
             resolve(response);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
-            reject(null);
+            resolve(null);
         }
     });
 }
