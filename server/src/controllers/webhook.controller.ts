@@ -6,10 +6,6 @@ import { gClient } from '@/services/graphql';
 
 class WebhookController {
 
-  constructor() {
-    console.log('test =>');
-    // getSelectedList('BTC,ETH');
-  }
   public index = async (req: Request, res: Response, next: NextFunction) => {
     const input = req.body;
     try {
@@ -61,7 +57,7 @@ class WebhookController {
    * the maim method to handle crypto widgets inside a post
    * how it works: 
    * firs we check for 'post.created' & 'post.updated' hook, then we extract the 'content' feild from mappingFields
-   * then we start for checkign all possible `wc` shortcodes with extractCWShortCodes method 
+   * then we start for checkign all possible `cw` shortcodes with extractCWShortCodes method 
    * then we have list of valid and invalid widgets knows as { widgets & removable }
    * we remove the removable from html content since those are invalid 
    * and we call the widgets getters & render method to fetch the final template for shortcode 
