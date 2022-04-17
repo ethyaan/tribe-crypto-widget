@@ -69,10 +69,11 @@ class WebhookController {
       let htmlValue = value;
       for (let shortCode of shortCodes) {
         let result = await shortCode.get({ pair: shortCode.widgetPair, ...shortCode.params(shortCode.widgetValue) });
-        console.log('_result_ =>', result);
-        // htmlValue = htmlValue.replace(shortCode.code, result);
+        let template = shortCode.render(result);
+        console.log('_result_ =>', JSON.stringify(new String(template)));
+        htmlValue = htmlValue.replace(shortCode.code, JSON.stringify(new String(template)));
       }
-      console.log('_DEBUG_ =>', shortCodes);
+      console.log('_DEBUG_ =>', htmlValue);
     }
     return {
       type: type,
