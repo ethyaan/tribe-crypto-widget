@@ -9,12 +9,6 @@ const apiRoutes = {
     'gainers-losers'    : '/v1/cryptocurrency/trending/gainers-losers'
 };
 
-// gainer looser params as enum
-enum sortDirection {
-    gainer = 'asc',
-    looser = 'desc'
-}
-
 /**
  * this is for calling axios api with CMC_key mapped
  * @param rouetName base on apiRoutes defined apis
@@ -50,9 +44,10 @@ const generateResponseArray = (responseArray: any, pair: string) => {
 
 /**
  * get top 10 from coin market cap based on cmc_rank and format as simpler object
+ * @param { pair } 
  * @returns 
  */
-export const getTop10 = (pair: string): Promise<any> => {
+export const getTop10 = ({ pair }: any): Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
             let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${pair}`);
@@ -67,10 +62,10 @@ export const getTop10 = (pair: string): Promise<any> => {
 
 /**
  * it will return the selecte dsymbols information only
- * @param selectedSymbols 
+ * @param { selectedSymbols, pair } 
  * @returns 
  */
-export const getSelectedList = (selectedSymbols: string, pair: string):Promise<any> => {
+export const getSelectedList = ({ selectedSymbols, pair }: any):Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
             let { data: { data }} = await call('quotes-latest', `?symbol=${selectedSymbols}&convert=${pair}`);
@@ -88,10 +83,10 @@ export const getSelectedList = (selectedSymbols: string, pair: string):Promise<a
 
 /**
  * get the list of top 10 gainers or loosers
- * @param sortDirection 
+ * @param { sortDirection, pair }
  * @returns 
  */
-export const getGainerLooser = (sortDirection: sortDirection, pair: string) => {
+export const getGainerLooser = ({ sortDirection, pair }: any): Promise<any> => {
     return new Promise(async(resolve, reject) => {
         try {
             let { data: { data }} = await call('gainers-losers', `?start=1&limit=10&sort_dir=${sortDirection}&convert=${pair}`);
