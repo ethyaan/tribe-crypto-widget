@@ -50,9 +50,21 @@ const generateResponseArray = (responseArray: any, pair: string) => {
 export const getTop10 = ({ pair }: any): Promise<any> => {
     return new Promise(async(resolve, reject): Promise<any> => {
         try {
-            let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${pair}`);
-            const response = generateResponseArray(data, pair);
-            resolve(response);
+            // let { data: { data }} = await call('listings-latest', `?start=1&limit=10&convert=${pair}`);
+            // const response = generateResponseArray(data, pair);
+            // resolve(response);
+            resolve([
+                   { symbol: 'BTC/USD', price: '40398.30', percent_change_24h: '-0.53' },
+                   { symbol: 'ETH/USD', price: '3059.47', percent_change_24h: '0.50' },
+                   { symbol: 'USDT/USD', price: '1.00', percent_change_24h: '-0.00' },
+                   { symbol: 'BNB/USD', price: '417.50', percent_change_24h: '-0.18' },
+                   { symbol: 'USDC/USD', price: '1.00', percent_change_24h: '0.00' },
+                   { symbol: 'XRP/USD', price: '0.78', percent_change_24h: '-2.41' },
+                   { symbol: 'SOL/USD', price: '102.03', percent_change_24h: '0.21' },
+                   { symbol: 'ADA/USD', price: '0.95', percent_change_24h: '-0.91' },
+                   { symbol: 'LUNA/USD', price: '80.78', percent_change_24h: '0.06' },
+                   { symbol: 'AVAX/USD', price: '77.58', percent_change_24h: '0.26' }
+                 ]);
         } catch(error) {
             logger.error('Error while fetch data from CMC ', error)
             reject(null);
