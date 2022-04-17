@@ -65,14 +65,20 @@ class WebhookController {
     const { name, object: { mappingFields } } = data;
     if(['post.created', 'post.updated'].indexOf(name)> -1) {
       const { value } = mappingFields.filter(({ key }) => key === 'content')[0];
-      const shortCodes = extractCWShortCodes(value);
+      const { widgets, removables } = extractCWShortCodes(value);
       let htmlValue = value;
-      for (let shortCode of shortCodes) {
-        let result = await shortCode.get({ pair: shortCode.widgetPair, ...shortCode.params(shortCode.widgetValue) });
-        let template = shortCode.render(result);
-        console.log('_result_ =>', JSON.stringify(new String(template)));
-        htmlValue = htmlValue.replace(shortCode.code, JSON.stringify(new String(template)));
+      // replace the widget templates
+      for (let widget of widgets) {
+        let result = await widget.get({ pair: widget.widgetPair, ...widget.params(widget.widgetValue) });
+        let template = widget.render(result);
+        htmlValue = htmlValue.replace(widget.code, JSON.stringify(new String(template)));
       }
+
+      // remove the removables
+      for(let remove of removables) {
+        htmlValue = htmlValue.replace(remove, '');
+      }
+
       console.log('_DEBUG_ =>', htmlValue);
     }
     return {
