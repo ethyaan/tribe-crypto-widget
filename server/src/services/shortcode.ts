@@ -10,11 +10,11 @@ const render = (result: [any]) => {
   if(result && result.length > 0) {
     out += `<ul class="crypto-widget">`;
     result.forEach((asset) => {
-      out += `<li> ${asset.symbol} - ${asset.price} (${asset.percent_change_24h}) <li>`;
+      out += `<li> ${asset.symbol} - ${asset.price} (${asset.percent_change_24h}) </li>`;
     });
     out += `</ul>`;
   }
-  return out;
+  return JSON.stringify(out).slice(1, -1);
 };
 
 // available widgets list
