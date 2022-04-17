@@ -20,16 +20,17 @@ class GqlClient {
             clientSecret: CLIENT_SECRET,
             graphqlUrl: GRAPHQL_URL,
         });
-        let token = await this.generateToken();
+        let token = await this.generateToken(client);
         client.setToken(token);
         this.client = client;
     }
 
     /**
      * generate token and return a promise
+     * @param client 
      */
-    private async generateToken() {
-        return this.client.generateToken({
+    private async generateToken(client: any) {
+        return client.generateToken({
             networkId: NETWORK_ID,
             memberId: MEMBER_ID,
         })
