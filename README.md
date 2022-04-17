@@ -6,10 +6,10 @@
     <img src="https://tribe.so/webflow-v2/images/TribeLogo.svg" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Tribe Starter App</h3>
+  <h3 align="center">Tribe Crypto ShortCode Widget</h3>
 
   <p align="center">
-    A template for you to develop apps on top of Tribe Community Platform
+    A set of shortcodes to add crypto currencies information into your post or comment
     <br />
     <a href="https://partners.tribe.so/docs/guide/index/"><strong>Explore the docs »</strong></a>
     <br />
@@ -25,9 +25,6 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
@@ -36,9 +33,7 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -46,18 +41,17 @@
 
 ## About The Project
 
-This is a template project for creating apps in Tribe.
+This Project adds this feature to tribe platform posts & replys to support defined crypto currency shortcodes which will be replaced with realtime market data.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+example usage of the available shortcodes: <br />
+```[cw top-10]```  will return the top 10 based on coinmarketcap ranking<br /> <br />
+```[cw top-10 pair="TRY"]``` will return the top 10 based on coinmarketcap ranking with TRY instead of USD as second side of the pair<br /><br />
+```[cw list="BNB,SOL,ADA"]``` will return the info about given list of currencies <br /> <br />
+```[cw list="BTC,ETH,ADA" pair="EUR"]```  will return the info about given list of currencies with EUR instead of USD as second side of the pair <br />
 
-### Built With
+Note: default value for `pair` is `USD`
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-- [Node.js](https://nodejs.org/en/)
-- [React.js](https://reactjs.org/)
-- [MongoDB](https://www.mongodb.com)
-
+ 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
@@ -92,24 +86,9 @@ _Below is an example of how you can instruct your audience on installing and set
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- USAGE EXAMPLES -->
-
-## Usage
-
-
-- [Mixpanel app](https://github.com/tribeplatform/tribe-mixpanel-app)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-## Acknowledgments
-
-- [README template](https://github.com/othneildrew/Best-README-Template)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
