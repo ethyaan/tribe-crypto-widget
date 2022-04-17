@@ -1,10 +1,43 @@
 import { getTop10, getSelectedList, getGainerLooser } from '@/services/coinmarketcap';
 
+/**
+ * render the result of the API as html elemt
+ * @param result 
+ * @returns html element as string
+ */
+const render = (result: [any]) => {
+  let out = ``;
+  if(result && result.length > 0) {
+    out += `<ul class="crypto-widget">`;
+    result.forEach((asset) => {
+      out += `<li> ${asset.symbol} - ${asset.price} (${asset.percent_change_24h}) <li>`;
+    });
+    out += `</ul>`;
+  }
+  return out;
+};
+
 const WIDGET_LIST = {
-  'top-10': { get: getTop10, params: (v) => { return {} } },
-  'list'  : { get: getSelectedList, params: (v) => { return { selectedSymbols: v } } },
-  'gainer': { get: getGainerLooser, params: (v) => { return { sortDirection: 'asc' } } },
-  'looser': { get: getGainerLooser, params: (v) => { return { sortDirection: 'desc' } } }
+  'top-10': {
+    get: getTop10,
+    params: (v) => { return {} },
+    render
+  },
+  'list'  : {
+    get: getSelectedList,
+    params: (v) => { return { selectedSymbols: v } },
+    render
+  },
+  'gainer': {
+    get: getGainerLooser,
+    params: (v) => { return { sortDirection: 'asc' } },
+    render
+  },
+  'looser': {
+    get: getGainerLooser,
+    params: (v) => { return { sortDirection: 'desc' } },
+    render
+  }
 };
 
 /**
